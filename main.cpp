@@ -236,8 +236,8 @@ void drawSphereFull(Vector3D center, double radius, int slices, int stacks, doub
 	struct point points[100][100];
 	int i, j;
 	double h, r;
-	//glColor3f(color[0],color[1],color[2]);
-	glColor3f(1,0,0);
+	glColor3f(color[0],color[1],color[2]);
+	
 	//generate points
 	for (i = 0; i <= stacks; i++)
 	{
@@ -245,9 +245,9 @@ void drawSphereFull(Vector3D center, double radius, int slices, int stacks, doub
 		r = radius * cos(((double)i / (double)stacks) * (pi / 2));
 		for (j = 0; j <= slices; j++)
 		{
-			points[i][j].x = r * cos(((double)j / (double)slices) * 2 * pi);
-			points[i][j].y =   r * sin(((double)j / (double)slices) * 2 * pi);
-			points[i][j].z =  h;
+			points[i][j].x = center.x + r * cos(((double)j / (double)slices) * 2 * pi);
+			points[i][j].y = center.y + r * sin(((double)j / (double)slices) * 2 * pi);
+			points[i][j].z = h;
 		}
 	}
 	//draw quads using generated points
@@ -256,21 +256,22 @@ void drawSphereFull(Vector3D center, double radius, int slices, int stacks, doub
 		//glColor3f((double)i / (double)stacks, (double)i / (double)stacks, (double)i / (double)stacks);
 		for (j = 0; j < slices; j++)
 		{
+			
 			glBegin(GL_QUADS);
 			{
 				//upper hemisphere
-
-                glVertex3f(points[i][j].x, points[i][j].y, points[i][j].z);
-                glVertex3f(points[i][j + 1].x, points[i][j + 1].y, points[i][j + 1].z);
-                glVertex3f(points[i + 1][j + 1].x, points[i + 1][j + 1].y, points[i + 1][j + 1].z);
-                glVertex3f(points[i + 1][j].x, points[i + 1][j].y, points[i + 1][j].z);
+				
+                glVertex3f(points[i][j].x, points[i][j].y, points[i][j].z+center.z);
+                glVertex3f(points[i][j + 1].x, points[i][j + 1].y, points[i][j + 1].z+center.z);
+                glVertex3f(points[i + 1][j + 1].x, points[i + 1][j + 1].y, points[i + 1][j + 1].z+center.z);
+                glVertex3f(points[i + 1][j].x, points[i + 1][j].y, points[i + 1][j].z+center.z);
 
 				//lower hemisphere
-
-                glVertex3f(points[i][j].x, points[i][j].y, -points[i][j].z);
-                glVertex3f(points[i][j + 1].x, points[i][j + 1].y, -points[i][j + 1].z);
-                glVertex3f(points[i + 1][j + 1].x, points[i + 1][j + 1].y, -points[i + 1][j + 1].z);
-                glVertex3f(points[i + 1][j].x, points[i + 1][j].y, -points[i + 1][j].z);
+				
+                glVertex3f(points[i][j].x, points[i][j].y, -points[i][j].z+center.z);
+                glVertex3f(points[i][j + 1].x, points[i][j + 1].y, -points[i][j + 1].z+center.z);
+                glVertex3f(points[i + 1][j + 1].x, points[i + 1][j + 1].y, -points[i + 1][j + 1].z+center.z);
+                glVertex3f(points[i + 1][j].x, points[i + 1][j].y, -points[i + 1][j].z+center.z);
 
 
 			}
@@ -563,6 +564,7 @@ void keyboardListener(unsigned char key, int x, int y)
 
 	case '1':
 		drawgrid=1-drawgrid;
+		drawfloor=1-drawfloor;
         look_left();
 		break;
     case '2':
@@ -770,10 +772,24 @@ void display()
     //shoot();
 	//drawSS();
 
-	drawCircle(30, 24);
-	for(int i=0; i<objects.size(); i++){
-		//if(objects[i])
+	// drawCircle(30, 24);
+	// Vector3D center(40,0,10);
+	// double color[3] = {0,1,0};
+	// double r = 20.0;
+	// drawSphereFull(center,r,50,40,color);
+
+	vector<Object*>::iterator iter, end;
+	Sphere* s;
+	for(iter = objects.begin(), end = objects.end() ; iter != end; ++iter) {
+		
+		if((s = dynamic_cast<Sphere*>(*iter)) != nullptr){
+			drawSphereFull(s->reference_point,s->length,30,24,s->color);
+		}
+			
 	}
+	// delete s;
+
+
 	//drawCone(20, 50, 24);
 
 	
