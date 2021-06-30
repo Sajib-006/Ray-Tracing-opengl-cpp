@@ -7,12 +7,14 @@
 #include <bits/stdc++.h>
 #include <GL/glut.h>
 
-
+#include "bitmap_image.hpp"
 #include "1605064.h"
 //#include <fstream>
 using namespace std;
 #include<string.h>
 #define pi (2 * acos(0.0))
+
+void capture();
 
 double cameraHeight;
 double cameraAngle;
@@ -31,10 +33,6 @@ vector<Object*> objects;
 vector<Light> lights;
 
 
-struct point
-{
-	double x, y, z;
-};
 point shotPoints[5000];
 point pos = {100, 100, 50};
 point u = {0, 0, 1};
@@ -561,7 +559,9 @@ void keyboardListener(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-
+	case '0':
+		capture();
+		break;
 	case '1':
 		drawgrid=1-drawgrid;
 		drawfloor=1-drawfloor;
@@ -803,6 +803,54 @@ void animate()
 	angle += 0.05;
 	//codes for any changes in Models, Camera
 	glutPostRedisplay();
+}
+
+void capture()
+{
+	bitmap_image image(500,300);
+	// set background color
+    for(int i=0;i<200;i++){
+        for(int j=0;j<100;j++){
+            image.set_pixel(i,j,255,255,0);
+        }
+        for(int j=150;j<200;j++){
+            image.set_pixel(i,j,0,0,255);
+        }
+    }
+
+    // for(int i=400;i<450;i++){
+    //     for(int j=50;j<150;j++){
+    //         image.set_pixel(i,j,255,0,0);
+    //     }
+    //     for(int j=200;j<300;j++){
+    //         image.set_pixel(i,j,0,255,255);
+    //     }
+    // }
+	double planeDistance, windowWidth, windowHeight, viewAngle, du, dv, imageWidth, imageHeight;
+	point eye, topleft, curPixel;
+	windowWidth = cameraHeight;
+	windowHeight = cameraHeight;
+	viewAngle = viewAngle;
+	eye = pos;
+	planeDistance = (windowHeight/2.0) / tan(viewAngle/2.0);
+	topleft = eye + l*planeDistance - r*(windowWidth/2) + u*(windowHeight/2);
+	du = windowWidth/imageWidth;
+	dv = windowHeight/imageHeight;
+	// Choose middle of the grid cell
+	topleft = topleft + r*(0.5*du) - u*(0.5*dv);
+	int nearest;
+	double t, tMin;
+
+	for(int i=0; i< imageWidth; i++){
+		for(int j=0; j<imageHeight; j++){
+			curPixel = topleft + r*(i*du) - u*(j*dv);
+			Ray ray(eye, curPixel-eye);
+			double *color = new double[3];
+			
+		}
+	}
+
+    image.save_image("out.bmp");;
 }
 
 void init()

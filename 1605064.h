@@ -12,15 +12,73 @@ public:
         this->z = z;
 
     }
+    Vector3D operator + (const Vector3D& vec) {
+        Vector3D temp;
+        temp.x = this->x + vec.x;
+        temp.y = this->y + vec.y;
+        temp.z = this->z + vec.z;
+        return temp;
+    }
+    Vector3D operator - (const Vector3D& vec) {
+        Vector3D temp;
+        temp.x = this->x - vec.x;
+        temp.y = this->y - vec.y;
+        temp.z = this->z - vec.z;
+        return temp;
+    }
+
+    double dotProduct(Vector3D b){
+        double val;
+        val = this->x * b.x + this->y * b.y + this->z * b.z;
+        return val;
+    }
+    Vector3D crossProduct(Vector3D b){
+        Vector3D res;
+        res.x = this->y * b.z - b.y * this->z;
+        res.y = this->z * b.x - b.z * this->x;
+        res.z = this->x * b.y - b.x * this->y;
+        return res;
+
+    }
+};
+
+struct point
+{
+	double x, y, z;
+	point(double x=0, double y=0, double z=0) 
+        : x(x), y(y), z(z)
+    {
+    }
+	point operator+(const point& p) const
+    {
+        return point(p.x+x, p.y+y + p.z+z);
+    }
+	point operator-(const point& p) const
+    {
+        return point(p.x-x, p.y-y + p.z-z);
+    }
+	point operator*(const point& p) const
+    {
+        return point(p.x*x, p.y*y + p.z*z);
+    }
 };
 
 class Ray{
+public:
     Vector3D start;
     Vector3D dir; // normalized
-public:
+
     Ray(Vector3D start, Vector3D dir){
         this->start = start;
         this->dir = dir;
+    }
+    Ray(point start, point dir){
+        this->start.x = start.x;
+        this->start.y = start.y;
+        this->start.z = start.z;
+        this->dir.x = dir.x;
+        this->dir.y = dir.y;
+        this->dir.z = dir.z;
     }
 };
 
@@ -71,7 +129,20 @@ public:
 
     }
     double intersect(Ray *r, double *color, int level){
-        return -1.0;
+        Vector3D R0;
+        double val, tp, d_sqr, t1, t;
+
+        R0 = r->start - reference_point;
+        tp = R0.dotProduct(r->dir);                 //tp = R0.Rd
+        val = R0.dotProduct(R0) - length * length;  //val = R0.R0-r^2
+        if(val > 0.0f && tp > 0.0f) return -1.0;    //here tp is negative value, so if tp>0 then creates obtuse angle
+
+        d_sqr = R0.dotProduct(R0) - tp * tp;
+        t1 = sqrt(length*length -d_sqr);
+        if(val > 0.0f) t = tp - t1;                 // if eye outside
+        else if(val < 0.0f) t = tp + t1;            // if eye inside
+        else t = tp;
+        return t;
     }
     void print(){
         printf("-----Sphere------\n");
