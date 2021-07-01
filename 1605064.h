@@ -1,4 +1,6 @@
 //#include <iostream>
+#include<bits/stdc++.h>
+using namespace std;
 class Vector3D{
 
 public:
@@ -40,6 +42,16 @@ public:
         return res;
 
     }
+    Vector3D normalize(){
+        double val;
+        val = sqrt(x*x + y*y + z*z);
+        this->x/=val;
+        this->y/=val;
+        this->z/=val;
+    }
+    void print(){
+        cout<< "Vector3D: x:"<<x<<" y:"<<y<<" z:"<<z<<endl;
+    }
 };
 
 struct point
@@ -61,6 +73,7 @@ struct point
     {
         return point(p.x*x, p.y*y + p.z*z);
     }
+    
 };
 
 class Ray{
@@ -71,6 +84,7 @@ public:
     Ray(Vector3D start, Vector3D dir){
         this->start = start;
         this->dir = dir;
+        this->dir.normalize();
     }
     Ray(point start, point dir){
         this->start.x = start.x;
@@ -79,6 +93,7 @@ public:
         this->dir.x = dir.x;
         this->dir.y = dir.y;
         this->dir.z = dir.z;
+        this->dir.normalize();
     }
 };
 
@@ -117,6 +132,14 @@ public:
         return -1.0;
     }
     virtual void print(){}
+
+    double* getAmbientColor(){
+        double ambient_color[3];
+        ambient_color[0] = this->color[0] * this->coEfficients[0];
+        ambient_color[1] = this->color[1] * this->coEfficients[0];
+        ambient_color[2] = this->color[2] * this->coEfficients[0];
+        return ambient_color;
+    }
 };
 
 class Sphere : public Object{
@@ -131,17 +154,23 @@ public:
     double intersect(Ray *r, double *color, int level){
         Vector3D R0;
         double val, tp, d_sqr, t1, t;
-
+        cout<< "In intersect(): ";
+        r->dir.print();
         R0 = r->start - reference_point;
         tp = R0.dotProduct(r->dir);                 //tp = R0.Rd
         val = R0.dotProduct(R0) - length * length;  //val = R0.R0-r^2
+        cout<<"val "<<val<<" tp:"<<tp<<endl;
         if(val > 0.0f && tp > 0.0f) return -1.0;    //here tp is negative value, so if tp>0 then creates obtuse angle
 
         d_sqr = R0.dotProduct(R0) - tp * tp;
+        
         t1 = sqrt(length*length -d_sqr);
+        cout<<"d^2: "<<d_sqr<<"t1: "<<t1<<endl;
         if(val > 0.0f) t = tp - t1;                 // if eye outside
         else if(val < 0.0f) t = tp + t1;            // if eye inside
         else t = tp;
+
+        color = getAmbientColor();
         return t;
     }
     void print(){

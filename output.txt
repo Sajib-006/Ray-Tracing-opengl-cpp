@@ -1,0 +1,31 @@
+hello
+Value of4 768 8
+
+sphere
+Sphere found
+-----Sphere------
+Center: 40.000000 0.000000 10.000000
+Radius: 10.000000
+Color: 0.000000 1.000000 0.000000
+Coefficients: 0.400000 0.200000 0.200000 0.200000
+Shine: 10
+
+sphere
+Sphere found
+-----Sphere------
+Center: -30.000000 60.000000 20.000000
+Radius: 20.000000
+Color: 0.000000 0.000000 1.000000
+Coefficients: 0.200000 0.200000 0.400000 0.200000
+Shine: 15
+
+sphere
+Sphere found
+-----Sphere------
+Center: -15.000000 15.000000 45.000000
+Radius: 15.000000
+Color: 1.000000 1.000000 0.000000
+Coefficients: 0.400000 0.300000 0.100000 0.200000
+Shine: 5
+
+hello2
