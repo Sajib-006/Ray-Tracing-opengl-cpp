@@ -838,7 +838,7 @@ void capture()
 	eye = pos;
 	printPoint(eye);
 	cout<< "angles---"<< viewAngle << tan(viewAngle/2.0) << tan(40)<<endl;
-	planeDistance = (windowHeight/2.0) * tan(viewAngle/2.0);
+	planeDistance = (windowHeight/2.0) / tan(viewAngle/2.0);
 	topleft = eye + l*planeDistance - r*(windowWidth/2) + u*(windowHeight/2);
 	du = windowWidth/imageWidth;
 	dv = windowHeight/imageHeight;
@@ -853,6 +853,10 @@ void capture()
 
 	
 	cout<<"------"<<endl;
+	Vector3D p(1,1,3),q(2,1,2),s(3,2,2);
+	//s = p - q;
+	//s.print();
+	cout<<determinant(p,q,s)<<endl;
 	// Choose middle of the grid cell
 	printPoint(topleft);
 	topleft = topleft + r*(0.5*du) - u*(0.5*dv);
@@ -921,7 +925,7 @@ void capture()
 				double color_r = clipColor(color[0]) * 255;
 				double color_g = clipColor(color[1]) * 255;
 				double color_b = clipColor(color[2]) * 255;
-				cout<< color_r << " " << color_g << " " << color_b << endl;
+				//cout<< color_r << " " << color_g << " " << color_b << endl; //------------
 				image.set_pixel(i,j,color_r,color_g,color_b);
 				//delete nearest_obj;
 			}

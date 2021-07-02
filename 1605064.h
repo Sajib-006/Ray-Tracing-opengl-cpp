@@ -305,6 +305,12 @@ public:
     }
 
 };
+double determinant(Vector3D a, Vector3D b, Vector3D c){
+    double det;
+    det = a.x*(b.y*c.z - b.z*c.y) - b.x*(a.y*c.z - a.z*c.y) + c.x*(a.y*b.z - a.z*b.y);
+    return det;
+}
+
 class Triangle: public Object{
     Vector3D vertex[3];
 public:
@@ -314,6 +320,7 @@ public:
         this->vertex[2] = v3;
     }
     void draw(){
+        glColor3f(color[0],color[1],color[2]);
         glBegin(GL_TRIANGLES);
         {
             glVertex3d(vertex[0].x, vertex[0].y, vertex[0].z);
@@ -322,7 +329,21 @@ public:
         }
         glEnd();
     }
-    double intersect(Ray *r, double *color, int level){
+    double intersect(Ray *r, double *color_out, int level){
+        double b, y, t, det;
+        det = determinant(vertex[0]-vertex[1], vertex[0]-vertex[2], r->dir);
+        b = determinant(vertex[0]-r->start, vertex[0]-vertex[2], r->dir)/det;
+        y = determinant(vertex[0]-vertex[1], vertex[0]-r->start, r->dir)/det;
+        t = determinant(vertex[0]-vertex[1], vertex[0]-vertex[2], vertex[0]-r->start)/det;
+
+        
+        color_out[0] = color[0];
+        color_out[1] = color[1];
+        color_out[2] = color[2];
+        if(b>0 && y>0 && b+y<1 && t>0) {
+            //cout<<"----------------"<<b<<" "<<y<<" "<<t<<endl;
+            return t;
+        }
         return -1.0;
     }
 };
