@@ -925,7 +925,7 @@ void capture()
 				double color_r = clipColor(color[0]) * 255;
 				double color_g = clipColor(color[1]) * 255;
 				double color_b = clipColor(color[2]) * 255;
-				//cout<< color_r << " " << color_g << " " << color_b << endl; //------------
+				cout<< color_r << " " << color_g << " " << color_b << endl; //------------
 				image.set_pixel(i,j,color_r,color_g,color_b);
 				//delete nearest_obj;
 			}
@@ -1036,6 +1036,27 @@ void loadData()
             
 			Object *temp;
             temp = new Triangle(v1,v2,v3);
+            temp->setColor(color[0],color[1],color[3]);
+            temp->setCoEfficients(amb,diff,spec,coeff);
+            temp->setShine(shine);
+            temp->print();
+			objects.push_back(temp);
+			
+        }
+		else if(!strcmp(command, "general")){
+            printf("general found\n");
+			double a,b,c,d,e,f,g,h,i,j;
+			Vector3D center;
+			double length,width,height;
+            double amb,diff,spec,coeff;
+			double color[3];
+            int shine;
+			fscanf(scene,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",&a,&b,&c,&d,&e,&f,&g,&h,&i,&j);
+			fscanf(scene,"%lf %lf %lf %lf %lf %lf",&center.x,&center.y,&center.z,&length,&width,&height);
+            fscanf(scene,"%lf %lf %lf %lf %lf %lf %lf %d",&color[0],&color[1],&color[3],&amb,&diff,&spec,&coeff,&shine);
+            
+			Object *temp;
+            temp = new Quadratic(a,b,c,d,e,f,g,h,i,j,center,length,width,height);
             temp->setColor(color[0],color[1],color[3]);
             temp->setCoEfficients(amb,diff,spec,coeff);
             temp->setShine(shine);

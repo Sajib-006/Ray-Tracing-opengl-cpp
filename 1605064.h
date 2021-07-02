@@ -407,6 +407,83 @@ public:
         //return -1.0;
     }
 };
+class Quadratic: public Object{
+    double a,b,c,d,e,f,g,h,i,j;
+public:
+    Quadratic(double a, double b, double c, double d, double e, double f, double g, double h, double i, double j, Vector3D center,double length, double width, double height){
+        this->a = a;
+        this->b = b;
+        this->c = c;
+        this->d = d;
+        this->e = e;
+        this->f = f;
+        this->g = g;
+        this->h = h;
+        this->i = i;
+        this->j = j;
+        reference_point = center;
+        length = length;
+        width = width;
+        height = height;
+    }
+    void print(){
+        cout<<"general"<<endl;
+    }
+    double intersect(Ray *r, double *color_out, int level){
+        double ax,bx,cx, xd,yd,zd, xo,yo,zo;
+        double t0,t1,t,discrim;
+        bool in1=false,in2=false;
+        Vector3D intP;
+        xd = r->dir.x;
+        yd = r->dir.y;
+        zd = r->dir.z;
+        xo = r->start.x;
+        yo = r->start.y;
+        zo = r->start.z;
+        ax = a*xd*xd + b*yd*yd + c*zd*zd +d*xd*yd + e*xd*zd + f*yd*zd;
+        bx = 2*a*xo*xd + 2*b*yo*yd + 2*c*zo*zd + d*(xo*yd + yo*xd) + e*(xo*zd + zo*xd) + f*(yo*zd + yd*zo);
+        bx+= g*xd + h*yd + i*zd;
+        cx = a*xo*xo + b*yo*yo + c*zo*zo + d*xo*yo + e*xo*zo + f*yo*zo + g*xo + h*yo + i*zo + j;
+        color_out[0] = color[0];
+        color_out[1] = color[1];
+        color_out[2] = color[2];
+        if(ax == 0) {
+            t = -cx/bx;
+            intP = get_intersect_point(r,t);
+            if((0 <= intP.x-reference_point.x <= length) && (0 <= intP.y-reference_point.y <= width) && (0 <= intP.z-reference_point.z <= height)){
+                //if(t0 > 0.0f) 
+                
+                cout<<"..............   0"<<endl;
+                return t;
+            }
+            
+        }
+        else{
+            discrim = bx*bx - 4*ax*cx;
+            if(discrim < 0.0f) return -1;
+            t0 = (-bx - sqrt(discrim) )/(2*ax);
+            //if(t0 > 0.0f) return t0;
+            intP = get_intersect_point(r,t0);
+            if((0 <= intP.x-reference_point.x <= length) && (0 <= intP.y-reference_point.y <= width) && (0 <= intP.z-reference_point.z <= height)){
+                //if(t0 > 0.0f) 
+                in1 = true;
+                cout<<"..............   1"<<endl;
+            }
+            t1 = (-bx + sqrt(discrim) )/(2*ax);
+            intP = get_intersect_point(r,t1);
+            if((0 <= intP.x-reference_point.x <= length) && (0 <= intP.y-reference_point.y <= width) && (0 <= intP.z-reference_point.z <= height)){
+                //if(t1 > 0.0f) 
+                in2 = true;
+                cout<<"..............   2"<<endl;
+            }
+            if(in1 && in2) return min(t0,t1);
+            else if(in1) return t0;
+            else if(in2) return t1;
+            else return -1;
+        }
+        return -1;
+    }
+};
 class Light{
     Vector3D light_pos;
     double color[3];
