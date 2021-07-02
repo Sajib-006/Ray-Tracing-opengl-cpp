@@ -786,9 +786,10 @@ void display()
 	Sphere* s;
 	for(iter = objects.begin(), end = objects.end() ; iter != end; ++iter) {
 		
-		if((s = dynamic_cast<Sphere*>(*iter)) != nullptr){
-			drawSphereFull(s->reference_point,s->length,30,24,s->color);
-		}
+		// if((s = dynamic_cast<Sphere*>(*iter)) != nullptr){
+		// 	drawSphereFull(s->reference_point,s->length,30,24,s->color);
+		// }
+		(*iter)->draw();
 			
 	}
 	// delete s;
@@ -946,7 +947,7 @@ void init()
 	//codes for initialization
 	drawgrid = 0;
 	drawaxes = 0;
-	drawfloor = 1;
+	drawfloor = 0;
 	cameraHeight = 150.0;
 	cameraAngle = 1.0;
 	angle = 0;
@@ -987,6 +988,9 @@ void loadData()
     fin >> pixels;
     fin>> total_obj;*/
     FILE *scene;
+
+	Object *temp = new Floor(1000, 20);
+	objects.push_back(temp);
     printf("Value of");
     if ((scene = fopen("scene.txt","r")) == NULL){
        printf("Error! opening file");
