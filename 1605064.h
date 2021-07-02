@@ -54,24 +54,44 @@ public:
     }
 };
 
-struct point
-{
+class point{
+public:
+
 	double x, y, z;
-	point(double x=0, double y=0, double z=0) 
-        : x(x), y(y), z(z)
-    {
+	point(double px=0, double py=0, double pz=0){
+        x = px;
+        y = py;
+        z = pz;
     }
+    
 	point operator+(const point& p) const
     {
-        return point(p.x+x, p.y+y + p.z+z);
+        return point(p.x+x, p.y+y , p.z+z);
     }
 	point operator-(const point& p) const
     {
-        return point(p.x-x, p.y-y + p.z-z);
+        return point(x-p.x, y-p.y , z-p.z);
     }
-	point operator*(const point& p) const
+	point operator*(const point& p)
     {
-        return point(p.x*x, p.y*y + p.z*z);
+        return point((p.x)*x, (p.y)*y , (p.z)*z);
+        // point temp;
+        // temp.x = x * p.x;
+        // temp.y = y * p.y;
+        // temp.z = z * p.z;
+        // return temp;
+    }
+    point operator+(const double n)
+    {
+        return point(n+x, n+y , n+z);
+    }
+    point operator-(const double n)
+    {
+        return point(x-n, y-n , z-n);
+    }
+    point operator*(const double n)
+    {
+        return point(n*x, n*y , n*z);
     }
     
 };
@@ -94,6 +114,11 @@ public:
         this->dir.y = dir.y;
         this->dir.z = dir.z;
         this->dir.normalize();
+    }
+    void print(){
+        cout<<"Ray printing.."<<endl;
+        start.print();
+        dir.print();
     }
 };
 
@@ -134,7 +159,7 @@ public:
     virtual void print(){}
 
     double* getAmbientColor(){
-        double ambient_color[3];
+        double *ambient_color = new double[3];
         ambient_color[0] = this->color[0] * this->coEfficients[0];
         ambient_color[1] = this->color[1] * this->coEfficients[0];
         ambient_color[2] = this->color[2] * this->coEfficients[0];
@@ -151,26 +176,57 @@ public:
     void draw(){
 
     }
-    double intersect(Ray *r, double *color, int level){
-        Vector3D R0;
-        double val, tp, d_sqr, t1, t;
-        cout<< "In intersect(): ";
-        r->dir.print();
-        R0 = r->start - reference_point;
-        tp = R0.dotProduct(r->dir);                 //tp = R0.Rd
-        val = R0.dotProduct(R0) - length * length;  //val = R0.R0-r^2
-        cout<<"val "<<val<<" tp:"<<tp<<endl;
-        if(val > 0.0f && tp > 0.0f) return -1.0;    //here tp is negative value, so if tp>0 then creates obtuse angle
+    // double intersect(Ray *r, double *color, int level){
+    //     Vector3D R0;
+    //     double val, tp, d_sqr, t1, t;
+    //     cout<< "In intersect(): ";
+    //     r->dir.print();
 
-        d_sqr = R0.dotProduct(R0) - tp * tp;
+    //     R0 = r->start - reference_point;
+
+    //     tp = R0.dotProduct(r->dir);                 //tp = R0.Rd
+    //     val = R0.dotProduct(R0) - length * length;  //val = R0.R0-r^2
+    //     cout<<"val "<<val<<" tp:"<<tp<<endl;
+    //     if(val > 0.0f && tp > 0.0f) return -1.0;    //here tp is negative value, so if tp>0 then creates obtuse angle
+
+    //     d_sqr = R0.dotProduct(R0) - tp * tp;
         
-        t1 = sqrt(length*length -d_sqr);
-        cout<<"d^2: "<<d_sqr<<"t1: "<<t1<<endl;
-        if(val > 0.0f) t = tp - t1;                 // if eye outside
-        else if(val < 0.0f) t = tp + t1;            // if eye inside
-        else t = tp;
+    //     t1 = sqrt(length*length -d_sqr);
+    //     cout<<"d^2: "<<d_sqr<<"t1: "<<t1<<endl;
+    //     if(val > 0.0f) t = tp - t1;                 // if eye outside
+    //     else if(val < 0.0f) t = tp + t1;            // if eye inside
+    //     else t = tp;
 
-        color = getAmbientColor();
+    //     color = getAmbientColor();
+    //     return t;
+    // }
+
+    double intersect(Ray *r, double *color_out, int level){
+        Vector3D R0;
+        double val, b, d_sqr, t1, t, discrim;
+        //cout<< "In intersect(): ";
+        //r->dir.print();
+
+        R0 = r->start - reference_point;
+        
+        b = 2 * R0.dotProduct(r->dir);                 //tp = R0.Rd
+        val = R0.dotProduct(R0) - length * length;  //val = R0.R0-r^2
+        
+        discrim = b * b - 4 * val;
+        //cout<<"val "<<val<<" b:"<<b<<"discrim: "<<discrim<<endl;
+        //R0.print();
+        //r->dir.print();
+        //cout<<"discrim: "<<discrim<<endl;
+        
+        if(discrim < 0.0f ) return -1.0;    //here tp is negative value, so if tp>0 then creates obtuse angle
+        discrim = sqrt(discrim);
+        t = min((-b+discrim)/2.0, (-b-discrim)/2.0 );
+        //color_out = getAmbientColor();
+        color_out[0] = color[0];
+        color_out[1] = color[1];
+        color_out[2] = color[2];
+
+        
         return t;
     }
     void print(){

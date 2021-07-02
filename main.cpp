@@ -39,7 +39,7 @@ point u = {0, 0, 1};
 point r = {-1 / sqrt(2), 1 / sqrt(2), 0};
 point l = {-1 / sqrt(2), -1 / sqrt(2), 0};
 
-void printPoint(struct point p){
+void printPoint(point p){
         cout<< "x:"<< p.x << " " << "y:"<< p.y << " " << "z:"<< p.z <<endl;
 }
 
@@ -809,16 +809,15 @@ void animate()
 	glutPostRedisplay();
 }
 
+double clipColor(double color){
+	if (color > 1.0f) color = 1.0f;
+	if (color < 0.0f) color = 0.0f;
+	return color;
+}
+
 void capture()
 {
-	bitmap_image image(500,300);
-	// set background color
-    for(int i=0;i<500;i++){
-        for(int j=0;j<300;j++){
-            image.set_pixel(i,j,0,0,0);
-        }
-        
-    }
+	
 
     // for(int i=400;i<450;i++){
     //     for(int j=50;j<150;j++){
@@ -837,69 +836,109 @@ void capture()
 	imageWidth = pixels;
 	eye = pos;
 	printPoint(eye);
-	planeDistance = (windowHeight/2.0) / tan(viewAngle/2.0);
+	cout<< "angles---"<< viewAngle << tan(viewAngle/2.0) << tan(40)<<endl;
+	planeDistance = (windowHeight/2.0) * tan(viewAngle/2.0);
 	topleft = eye + l*planeDistance - r*(windowWidth/2) + u*(windowHeight/2);
 	du = windowWidth/imageWidth;
 	dv = windowHeight/imageHeight;
+	cout<<"------"<<endl;
+	printPoint(l*planeDistance);
+	printPoint(r*(windowWidth/2));
+	printPoint(u*(windowHeight/2));
+
+	printPoint(l);
+	printPoint(r);
+	printPoint(u);
+
+	
+	cout<<"------"<<endl;
 	// Choose middle of the grid cell
 	printPoint(topleft);
 	topleft = topleft + r*(0.5*du) - u*(0.5*dv);
+	cout<<"topleft ";
 	printPoint(topleft);
 	int nearest;
 	double t, tMin=INT_MAX;
 	int cnt=0;
-	cout<< planeDistance<<" "<<" "<<du<<" "<<dv<<" "<<endl;
+	
+	cout<< "plane dis: "<<planeDistance<<" "<<" "<<du<<" "<<dv<<" "<<endl;
 
 	//test code started
-	point r_dir = {-0.528493, 0.848938, 0};
-	double *dummyColor = new double[3];
-	Ray *ray = new Ray(eye, r_dir);
-	for(int i=0; i<objects.size(); i++){
-		t = objects[i]->intersect(ray, dummyColor, 0);
-		cout<<i<<" t: "<<t<<endl;
-	}
-	//test code ended
-
-	// for(int i=0; i< imageWidth; i++){
-	// 	for(int j=0; j<imageHeight; j++){
-	// 		cnt++;
-	// 		curPixel = topleft + r*(i*du) - u*(j*dv);
-	// 		//cout<<cnt++<<" ";
-	// 		//printPoint(curPixel);
-	// 		Ray *ray = new Ray(eye, curPixel-eye);
-	// 		double *color = new double[3];
-	// 		double *dummyColor = new double[3];
-	// 		Object *nearest_obj;
-	// 		bool changed = false;
-	// 		for(int i=0; i<objects.size(); i++){
-	// 			t = objects[i]->intersect(ray, dummyColor, 0);
-	// 			cout<<cnt<<" "<<t<<endl;
-	// 			if(t > 0 && t < tMin){
-	// 				tMin = t;
-	// 				nearest_obj = objects[i];
-	// 				changed = true;
-	// 			}
-	// 		}
-	// 		if(changed){
-	// 			tMin = nearest_obj->intersect(ray, color, 1);
-	// 			double color_r = color[0] * 255;
-	// 			double color_g = color[1] * 255;
-	// 			double color_b = color[2] * 255;
-	// 			image.set_pixel(j,i,color_r,color_g,color_b);
-	// 			delete nearest_obj;
-	// 		}
-			
-			
-			
-	// 		delete ray;
-	// 		delete color;
-	// 		delete dummyColor;
-			
-	// 	}
+	// point r_dir = {-0.528493, 0.848938, 0};
+	// double *dummyColor = new double[3];
+	// Ray *ray = new Ray(eye, r_dir);
+	// for(int i=0; i<objects.size(); i++){
+	// 	t = objects[i]->intersect(ray, dummyColor, 0);
+	// 	cout<<i<<" t: "<<t<<endl;
 	// }
 
+	// point st = {0, 100, 10};
+	// point r_dir = {0, 1, 0};
+	// double *dummyColor = new double[3];
+	// Ray *ray = new Ray(st, r_dir);
+	// for(int i=0; i<objects.size(); i++){
+	// 	t = objects[i]->intersect(ray, dummyColor, 0);
+	// 	cout<<i<<" t: "<<t<<endl;
+	// }
+	//test code ended
+	ofstream fout("output.txt");
+	bitmap_image image(imageWidth,imageHeight);
+	// set background color
+    for(int i=0;i<imageWidth;i++){
+        for(int j=0;j<imageHeight;j++){
+            image.set_pixel(i,j,0,0,0);
+        }
+        
+    }
+	int test_cnt=0;
+	for(int i=0; i< imageWidth; i++){
+		for(int j=0; j<imageHeight; j++){
+			cnt++;
+			tMin = INT_MAX;
+			curPixel = topleft + r*(i*du) - u*(j*dv);
+			//cout<<cnt++<<" ";
+			//printPoint(curPixel);
+			Ray *ray = new Ray(eye, curPixel-eye);
+			double *color = new double[3];
+			double *dummyColor = new double[3];
+			Object *nearest_obj = 0;
+			bool changed = false;
+			if(i==0 && j==0) ray->print(); //----------------
+			for(int i=0; i<objects.size(); i++){
+				t = objects[i]->intersect(ray, dummyColor, 0);
+				
+				if(t > 0 && t < tMin){
+					tMin = t;
+					nearest_obj = objects[i];
+					changed = true;
+					test_cnt++;
+					fout<<cnt<<" "<<t<<endl; //--------------
+				}
+			}
+			if(changed){
+				tMin = nearest_obj->intersect(ray, color, 1);
+				double color_r = clipColor(color[0]) * 255;
+				double color_g = clipColor(color[1]) * 255;
+				double color_b = clipColor(color[2]) * 255;
+				cout<< color_r << " " << color_g << " " << color_b << endl;
+				image.set_pixel(i,j,color_r,color_g,color_b);
+				//delete nearest_obj;
+			}
+			
+			
+			
+			delete ray;
+			delete color;
+			delete dummyColor;
+			//delete nearest_obj;
+			
+		}
+	}
+	
+	fout.close();
     image.save_image("out.bmp");;
 	cout << "image done" << endl;
+	cout<<test_cnt<<endl;
 }
 
 void init()
