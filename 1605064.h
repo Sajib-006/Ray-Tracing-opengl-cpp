@@ -314,7 +314,13 @@ public:
         this->vertex[2] = v3;
     }
     void draw(){
-
+        glBegin(GL_TRIANGLES);
+        {
+            glVertex3d(vertex[0].x, vertex[0].y, vertex[0].z);
+            glVertex3d(vertex[1].x, vertex[1].y, vertex[1].z);
+            glVertex3d(vertex[2].x, vertex[2].y, vertex[2].z);
+        }
+        glEnd();
     }
     double intersect(Ray *r, double *color, int level){
         return -1.0;
@@ -352,8 +358,9 @@ public:
     }
     double intersect(Ray *r, double *color_out, int level){
         Vector3D n(0,0,1);
-        double temp, temp2, t;
-        temp = r->start.dotProduct(n);
+        double temp, temp2, t, D;
+        D = 0;
+        temp = (D + r->start.dotProduct(n));
         temp2 = r->dir.dotProduct(n);
         t = -temp/temp2;
         Vector3D int_point = get_intersect_point(r,t);

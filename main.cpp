@@ -1021,6 +1021,24 @@ void loadData()
 			objects.push_back(sphere);
 			
         }
+		else if(!strcmp(command, "triangle")){
+            printf("Triangle found\n");
+			Vector3D v1,v2,v3;
+            double amb,diff,spec,coeff;
+			double color[3];
+            int shine;
+			fscanf(scene,"%lf %lf %lf %lf %lf %lf %lf %lf %lf",&v1.x,&v1.y,&v1.z,&v2.x,&v2.y,&v2.z,&v3.x,&v3.y,&v3.z);
+            fscanf(scene,"%lf %lf %lf %lf %lf %lf %lf %d",&color[0],&color[1],&color[3],&amb,&diff,&spec,&coeff,&shine);
+            
+			Object *temp;
+            temp = new Triangle(v1,v2,v3);
+            temp->setColor(color[0],color[1],color[3]);
+            temp->setCoEfficients(amb,diff,spec,coeff);
+            temp->setShine(shine);
+            temp->print();
+			objects.push_back(temp);
+			
+        }
 
     }
 }
