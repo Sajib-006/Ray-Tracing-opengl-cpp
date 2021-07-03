@@ -149,6 +149,11 @@ public:
          //cout("Object claas constructor\n");
 
     }
+    Object(double length, double width, double height){
+        this->length = length;
+        this->width = width;
+        this->height = height;
+    }
     virtual void draw(){
         //cout("Object claas draw()\n");
     }
@@ -410,7 +415,9 @@ public:
 class Quadratic: public Object{
     double a,b,c,d,e,f,g,h,i,j;
 public:
-    Quadratic(double a, double b, double c, double d, double e, double f, double g, double h, double i, double j, Vector3D center,double length, double width, double height){
+    Quadratic(double a, double b, double c, double d, double e, double f, double g, double h, double i, double j, Vector3D center,double length, double width, double height)
+    :Object(length,width,height)
+    {
         this->a = a;
         this->b = b;
         this->c = c;
@@ -422,12 +429,16 @@ public:
         this->i = i;
         this->j = j;
         reference_point = center;
-        length = length;
-        width = width;
-        height = height;
+        // length = length;
+        // width = width;
+        // height = height;
     }
     void print(){
-        cout<<"general"<<endl;
+        cout<<"general printing........."<<endl;
+        cout<<a<<" "<<b<<" "<<c<<" "<<d<<" "<<f<<" "<<g<<" "<<h<<" "<<i<<" "<<j<<" "<<endl;
+        reference_point.print();
+        cout<<length<<" "<<width<<" "<<height<<endl;
+
     }
     double intersect(Ray *r, double *color_out, int level){
         double ax,bx,cx, xd,yd,zd, xo,yo,zo;
@@ -441,19 +452,18 @@ public:
         yo = r->start.y;
         zo = r->start.z;
         ax = a*xd*xd + b*yd*yd + c*zd*zd +d*xd*yd + e*xd*zd + f*yd*zd;
-        bx = 2*a*xo*xd + 2*b*yo*yd + 2*c*zo*zd + d*(xo*yd + yo*xd) + e*(xo*zd + zo*xd) + f*(yo*zd + yd*zo);
-        bx+= g*xd + h*yd + i*zd;
+        bx = 2*a*xo*xd + 2*b*yo*yd + 2*c*zo*zd + d*(xo*yd + yo*xd) + e*(xo*zd + zo*xd) + f*(yo*zd + yd*zo) + g*xd + h*yd + i*zd;
         cx = a*xo*xo + b*yo*yo + c*zo*zo + d*xo*yo + e*xo*zo + f*yo*zo + g*xo + h*yo + i*zo + j;
         color_out[0] = color[0];
         color_out[1] = color[1];
         color_out[2] = color[2];
-        if(ax == 0) {
+        if(ax == 0.0f) {
             t = -cx/bx;
             intP = get_intersect_point(r,t);
-            if((0 <= intP.x-reference_point.x <= length) && (0 <= intP.y-reference_point.y <= width) && (0 <= intP.z-reference_point.z <= height)){
+            if((length==0.0f || ( intP.x >= reference_point.x && intP.x <= reference_point.x+length)) && (width==0.0f ||( intP.y >= reference_point.y && intP.y <= reference_point.y+width)) && (height==0.0f || (intP.z >= reference_point.z && intP.z <= reference_point.z+ height))){
                 //if(t0 > 0.0f) 
                 
-                cout<<"..............   0"<<endl;
+                //cout<<"..............   0"<<endl;
                 return t;
             }
             
@@ -464,17 +474,22 @@ public:
             t0 = (-bx - sqrt(discrim) )/(2*ax);
             //if(t0 > 0.0f) return t0;
             intP = get_intersect_point(r,t0);
-            if((0 <= intP.x-reference_point.x <= length) && (0 <= intP.y-reference_point.y <= width) && (0 <= intP.z-reference_point.z <= height)){
+            //intP.print();
+            if((length==0.0f || ( intP.x >= reference_point.x && intP.x <= reference_point.x+length)) && (width==0.0f ||( intP.y >= reference_point.y && intP.y <= reference_point.y+width)) && (height==0.0f || (intP.z >= reference_point.z && intP.z <= reference_point.z+ height))){
                 //if(t0 > 0.0f) 
                 in1 = true;
-                cout<<"..............   1"<<endl;
+                //cout<<"..............   1"<<endl;
             }
             t1 = (-bx + sqrt(discrim) )/(2*ax);
             intP = get_intersect_point(r,t1);
-            if((0 <= intP.x-reference_point.x <= length) && (0 <= intP.y-reference_point.y <= width) && (0 <= intP.z-reference_point.z <= height)){
+            //intP.print();
+            //if((0 <= intP.x-reference_point.x <= length) && (0 <= intP.y-reference_point.y <= width) && (0 <= intP.z-reference_point.z <= height)){
+            //if(( intP.x >= reference_point.x && intP.x <= reference_point.x+length) && ( intP.y >= reference_point.y && intP.y <= reference_point.y+width) && (intP.z >= reference_point.z && intP.z <= reference_point.z+ height)){
+            if((length==0.0f || ( intP.x >= reference_point.x && intP.x <= reference_point.x+length)) && (width==0.0f ||( intP.y >= reference_point.y && intP.y <= reference_point.y+width)) && (height==0.0f || (intP.z >= reference_point.z && intP.z <= reference_point.z+ height))){
+            
                 //if(t1 > 0.0f) 
                 in2 = true;
-                cout<<"..............   2"<<endl;
+                //cout<<"..............   2"<<endl;
             }
             if(in1 && in2) return min(t0,t1);
             else if(in1) return t0;

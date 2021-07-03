@@ -34,7 +34,8 @@ vector<Light> lights;
 
 
 point shotPoints[5000];
-point pos = {100, 100, 50};
+//point pos = {100, 100, 50};
+point pos = {200, 300, 160};
 point u = {0, 0, 1};
 point r = {-1 / sqrt(2), 1 / sqrt(2), 0};
 point l = {-1 / sqrt(2), -1 / sqrt(2), 0};
@@ -925,7 +926,7 @@ void capture()
 				double color_r = clipColor(color[0]) * 255;
 				double color_g = clipColor(color[1]) * 255;
 				double color_b = clipColor(color[2]) * 255;
-				cout<< color_r << " " << color_g << " " << color_b << endl; //------------
+				//cout<< color_r << " " << color_g << " " << color_b << endl; //------------
 				image.set_pixel(i,j,color_r,color_g,color_b);
 				//delete nearest_obj;
 			}
