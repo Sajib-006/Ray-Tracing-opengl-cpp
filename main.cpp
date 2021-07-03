@@ -28,14 +28,14 @@ int k;
 bool isShot;
 long shotCnt;
 
-int recursion_level, pixels, total_obj;
+int recursion_level, pixels, total_obj, total_lights;
 vector<Object*> objects;
-vector<Light> lights;
+vector<Light*> lights;
 
 
 point shotPoints[5000];
 //point pos = {100, 100, 50};
-point pos = {200, 300, 160};
+point pos = {150, 250, 130};
 point u = {0, 0, 1};
 point r = {-1 / sqrt(2), 1 / sqrt(2), 0};
 point l = {-1 / sqrt(2), -1 / sqrt(2), 0};
@@ -784,7 +784,7 @@ void display()
 	// drawSphereFull(center,r,50,40,color);
 
 	vector<Object*>::iterator iter, end;
-	Sphere* s;
+	
 	for(iter = objects.begin(), end = objects.end() ; iter != end; ++iter) {
 		
 		// if((s = dynamic_cast<Sphere*>(*iter)) != nullptr){
@@ -792,6 +792,9 @@ void display()
 		// }
 		(*iter)->draw();
 			
+	}
+	for(int i=0; i<lights.size(); i++){
+		lights[i]->draw();
 	}
 	// delete s;
 
@@ -1008,8 +1011,10 @@ void loadData()
     fscanf(scene,"%d", &total_obj);
     printf("%d %d %d\n\n", recursion_level,pixels,total_obj);
     char command[10];
-    while (fscanf(scene, "%s", command) != EOF) {
-            printf("%s\n",command);
+	for(int i=0; i<total_obj; i++){
+
+		fscanf(scene, "%s", command);
+        printf("%s\n",command);
         if(!strcmp(command, "sphere")){
             printf("Sphere found\n");
             double x,y,z,r,amb,diff,spec,coeff;
@@ -1067,6 +1072,18 @@ void loadData()
         }
 
     }
+	
+	fscanf(scene,"%d", &total_lights);
+	for(int i=0; i<total_lights; i++){
+		Light *temp;
+		Vector3D v;
+		double color[3];
+		fscanf(scene,"%lf %lf %lf",&v.x,&v.y,&v.z);
+		fscanf(scene,"%lf %lf %lf",&color[0],&color[1],&color[2]);
+		temp = new Light(v,color[0],color[1],color[2]);
+		temp->print();
+		lights.push_back(temp);
+	}
 }
 
 

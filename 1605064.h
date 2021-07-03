@@ -517,6 +517,21 @@ public:
         this->color[1] = g;
         this->color[2] = b;
     }
+    void print(){
+        cout<<"Light printing...."<<endl;
+        cout<<light_pos.x<<" "<<light_pos.y<<" "<<light_pos.z<<endl;
+        cout<<color[0]<<" "<<color[1]<<" "<<color[2]<<endl;
+    }
+    void draw(){
+        glColor3d(color[0],color[1],color[2]);
+        glPointSize(5);
+        glBegin(GL_POINTS);
+        {
+            glVertex3d(light_pos.x,light_pos.y,light_pos.z);
+        }
+        glEnd();
+        
+    }
 
 };
 
