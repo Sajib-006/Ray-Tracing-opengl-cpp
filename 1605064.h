@@ -2,7 +2,12 @@
 #include<bits/stdc++.h>
 #define pi (2 * acos(0.0))
 using namespace std;
-
+ofstream fout("t_test.txt");
+const double eps = 0.00001;
+bool debugF = false;
+bool debugS = false;
+bool debugT = false;
+bool debugG = false;
 
 class Vector3D{
 
@@ -31,7 +36,14 @@ public:
         temp.z = this->z - vec.z;
         return temp;
     }
-
+    Vector3D operator * (const double n)
+    {
+        return Vector3D(n*x, n*y , n*z);
+    }
+    Vector3D operator + (const double n)
+    {
+        return Vector3D(n+x, n+y , n+z);  
+    }
     double dotProduct(Vector3D b){
         double val;
         val = this->x * b.x + this->y * b.y + this->z * b.z;
@@ -51,6 +63,16 @@ public:
         this->x/=val;
         this->y/=val;
         this->z/=val;
+        return *this;
+    }
+    Vector3D reverse(){
+        return Vector3D(-x,-y,-z);
+    }
+    double getValue(){
+        return sqrt(x*x + y*y + z*z);
+    }
+    Vector3D multiply(double n){
+        return Vector3D(x*n, y*n, z*n);
     }
     void print(){
         cout<< "Vector3D: x:"<<x<<" y:"<<y<<" z:"<<z<<endl;
@@ -107,6 +129,9 @@ public:
     Vector3D start;
     Vector3D dir; // normalized
 
+    Ray(){
+
+    }
     Ray(Vector3D start, Vector3D dir){
         this->start = start;
         this->dir = dir;
@@ -121,11 +146,54 @@ public:
         this->dir.z = dir.z;
         this->dir.normalize();
     }
+    Ray reverse(){
+        Ray temp;
+        temp.start = start;
+        temp.dir = dir * (-1.0);
+        return temp;
+    }
     void print(){
         cout<<"Ray printing.."<<endl;
         start.print();
         dir.print();
     }
+};
+
+class Light{
+public:
+    Vector3D light_pos;
+    double color[3];
+
+    Light(Vector3D light_pos){
+        this->light_pos = light_pos;
+    }
+    Light(Vector3D light_pos, double r, double g, double b){
+        this->light_pos = light_pos;
+        this->color[0] = r;
+        this->color[1] = g;
+        this->color[2] = b;
+    }
+    void setColor(double r, double g, double b){
+        this->color[0] = r;
+        this->color[1] = g;
+        this->color[2] = b;
+    }
+    void print(){
+        cout<<"Light printing...."<<endl;
+        cout<<light_pos.x<<" "<<light_pos.y<<" "<<light_pos.z<<endl;
+        cout<<color[0]<<" "<<color[1]<<" "<<color[2]<<endl;
+    }
+    void draw(){
+        glColor3d(color[0],color[1],color[2]);
+        glPointSize(5);
+        glBegin(GL_POINTS);
+        {
+            glVertex3d(light_pos.x,light_pos.y,light_pos.z);
+        }
+        glEnd();
+        
+    }
+
 };
 
 Vector3D get_intersect_point(Ray *r,double t){
@@ -183,7 +251,13 @@ public:
         ambient_color[2] = this->color[2] * this->coEfficients[0];
         return ambient_color;
     }
+    virtual void test(){
+        cout<<"test done"<<endl;
+    }
 };
+
+extern vector<Object*> objects;
+extern vector<Light*> lights;
 
 class Sphere : public Object{
 public:
@@ -198,6 +272,9 @@ public:
     void setdrawparameter(int slices, int stacks){
         this->slices = slices;
         this->stacks = stacks;
+    }
+    Vector3D getNormal(Vector3D ip){
+        return (ip - reference_point).normalize();
     }
     void draw(){
         
@@ -271,8 +348,12 @@ public:
     //     color = getAmbientColor();
     //     return t;
     // }
-
+    void test()
+    {
+        cout<<"In sphere test"<<endl;
+    }
     double intersect(Ray *r, double *color_out, int level){
+        //cout<<"intersect()"<<endl;
         Vector3D R0;
         double val, b, d_sqr, t1, t, discrim;
         //cout<< "In intersect(): ";
@@ -293,12 +374,93 @@ public:
         discrim = sqrt(discrim);
         t = min((-b+discrim)/2.0, (-b-discrim)/2.0 );
         //color_out = getAmbientColor();
-        color_out[0] = color[0];
-        color_out[1] = color[1];
-        color_out[2] = color[2];
+        if(t < 0) return -1.0;
+        if(level == 0) {
+            if (debugS) fout<<"t here: "<<t<<endl;
+            return t;
+        }
+        else if (level > 0){
+            
+            if (debugS) fout<<"prev t: "<<t<<endl;
+            Vector3D ip = get_intersect_point(r,t);
+            //ambient color
+            color_out[0] = color[0] * coEfficients[0];
+            color_out[1] = color[1] * coEfficients[0];
+            color_out[2] = color[2] * coEfficients[0];
+            Vector3D N = getNormal(ip);
+            
+            for(int i=0; i<lights.size(); i++){
 
+                //Vector3D l_ray_start = ip+(lights[i]->light_pos - ip).normalize() + eps;
+                //Ray *l_ray = new Ray(l_ray_start, lights[i]->light_pos - l_ray_start);
+                //double dist = (lights[i]->light_pos - l_ray_start).getValue();
+
+                Vector3D l_ray_start = ip + eps;
+                Ray *l_ray = new Ray(l_ray_start, lights[i]->light_pos - ip);
+                double dist = (lights[i]->light_pos - l_ray_start).getValue();
+
+                //l_ray->print();
+                //double dist = (lights[i]->light_pos - ip).getValue();
+                
+                if (debugS) fout<< dist<<" "<< (lights[i]->light_pos - l_ray_start).getValue()<<endl;
+                bool obscured = false;
+                for(int j=0; j<objects.size(); j++){
+                    double *dumcolor = new double[3];
+                    //objects[j]->test();
+                    double t2 = objects[j]->intersect(l_ray,dumcolor,0);
+                    if (debugS) fout<<j<<" ----------------"<<t2<<endl;
+                    if(t2 > 0 && t2< dist){
+                        obscured = true;
+                        if (debugS) fout<<t2<<" break"<<endl;
+                        break;
+                    }
+                }
+                if(!obscured){
+                    if (debugS) fout<<"diff & spec"<<endl;
+                    Vector3D L,R,V,r_ray_dir,tempV;
+                    double lambert,phong,temp;
+
+                    L = l_ray->dir;
+                    r_ray_dir = L - N*(2.0 * L.dotProduct(N));
+                    Ray *r_ray = new Ray(ip,r_ray_dir);
+                    R = r_ray->dir;
+                    lambert = max(0.0, L.dotProduct(N));
+                    V = r->dir;
+                    phong = max(0.0, R.dotProduct(V));
+
+
+                    // L = (ip - lights[i]->light_pos).normalize();
+                    // temp = L.dotProduct(N) * 2;
+                    // R = (( N * temp )-L).normalize();
+                    // lambert = max(0.0, L.dotProduct(N));
+                    // V = r->dir.reverse();
+                    // phong = max(0.0, R.dotProduct(V));
+
+
+
+                    //Vector3D l_dir = l_ray->dir;
+                    //L = (lights[i]->light_pos - ip - l_dir).normalize();
+                    
+
+
+                    // L = l_ray->dir;
+                    // lambert = max(0.0, L.dotProduct(N));
+                    // Vector3D l_dir = (ip - lights[i]->light_pos).normalize();
+                    // R = (N*(2*l_dir.dotProduct(N)) - l_dir);
+                    // Ray *r_ray = new Ray(ip,R);
+                    // R = r_ray->dir;
+                    // V = r->dir.reverse();
+                    // phong = max(0.0, R.dotProduct(V));
+
+                    color_out[0] += lights[i]->color[0] * color[0] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                    color_out[1] += lights[i]->color[1] * color[1] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                    color_out[2] += lights[i]->color[2] * color[2] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                }
+            }
         
-        return t;
+            return t;
+        }
+        
     }
     void print(){
         printf("-----Sphere------\n");
@@ -334,6 +496,11 @@ public:
         }
         glEnd();
     }
+    Vector3D getNormal(Vector3D ip){
+        Vector3D N =(vertex[1]-vertex[0]).crossProduct(( vertex[2]-vertex[0] ));
+        if(ip.dotProduct(N)) return N.reverse().normalize();
+        else return N;
+    }
     double intersect(Ray *r, double *color_out, int level){
         double b, y, t, det;
         det = determinant(vertex[0]-vertex[1], vertex[0]-vertex[2], r->dir);
@@ -347,7 +514,57 @@ public:
         color_out[2] = color[2];
         if(b>0 && y>0 && b+y<1 && t>0) {
             //cout<<"----------------"<<b<<" "<<y<<" "<<t<<endl;
-            return t;
+            if(level == 0) return t;
+            else if (level > 0){
+                
+                if (debugT) fout<<"prev t: "<<t<<endl;
+                Vector3D ip = get_intersect_point(r,t);
+                //ambient color
+                color_out[0] = color[0] * coEfficients[0];
+                color_out[1] = color[1] * coEfficients[0];
+                color_out[2] = color[2] * coEfficients[0];
+                Vector3D N = getNormal(ip);
+                //N.print();
+                
+                for(int i=0; i<lights.size(); i++){
+
+                    Vector3D l_ray_start = ip + eps;
+                    Ray *l_ray = new Ray(l_ray_start, lights[i]->light_pos - ip);
+                    double dist = (lights[i]->light_pos - l_ray_start).getValue();
+                    
+                    if (debugT) fout<< dist<<" "<< (lights[i]->light_pos - l_ray_start).getValue()<<endl;
+                    bool obscured = false;
+                    for(int j=0; j<objects.size(); j++){
+                        double *dumcolor = new double[3];
+                        double t2 = objects[j]->intersect(l_ray,dumcolor,0);
+                        if (debugT) fout<<j<<" ----------------"<<t2<<endl;
+                        if(t2 > 0 && t2< dist){
+                            obscured = true;
+                            if (debugT) fout<<t2<<" break"<<endl;
+                            break;
+                        }
+                    }
+                    if(!obscured){
+                        if (debugT) fout<<"diff & spec"<<endl;
+                        Vector3D L,R,V,r_ray_dir,tempV;
+                        double lambert,phong,temp;
+
+                        L = l_ray->dir;
+                        r_ray_dir = L - N*(2.0 * L.dotProduct(N));
+                        Ray *r_ray = new Ray(ip,r_ray_dir);
+                        R = r_ray->dir;
+                        lambert = max(0.0, L.dotProduct(N));
+                        V = r->dir;
+                        phong = max(0.0, R.dotProduct(V));
+
+                        color_out[0] += lights[i]->color[0] * color[0] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                        color_out[1] += lights[i]->color[1] * color[1] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                        color_out[2] += lights[i]->color[2] * color[2] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                    }
+                }
+            
+                return t;
+            }
         }
         return -1.0;
     }
@@ -358,6 +575,11 @@ public:
     Floor(double floorWidth, double tileWidth){
         reference_point = Vector3D(-floorWidth/2,-floorWidth/2,0);
         length = tileWidth;
+        coEfficients[0] = 0.4;
+        coEfficients[1] = 0.2;
+        coEfficients[2] = 0.3;
+        coEfficients[3] = 0.3;
+        shine = 5;
     }
     void draw(){
         //cout<<"in floor draw()"<<endl;
@@ -382,6 +604,29 @@ public:
 
         }
     }
+    Vector3D getNormal(Vector3D ip){
+        return Vector3D(0,0,1);
+    }
+    void setIpColor(Vector3D int_point){
+        if(int_point.x >= reference_point.x && int_point.x <= -reference_point.x && int_point.y >= reference_point.y && int_point.y <= -reference_point.y){
+            int val = int(ceil(int_point.x/length)) + int(ceil(int_point.y/length));
+            if( val%2 == 0 ) {
+                color[0] = 1;
+                color[1] = 1;
+                color[2] = 1;
+            }
+            else {
+                color[0] = 0;
+                color[1] = 0;
+                color[2] = 0;
+            } 
+        }
+        else{
+            color[0] = 0;
+            color[1] = 0;
+            color[2] = 0;
+        }
+    }
     double intersect(Ray *r, double *color_out, int level){
         Vector3D n(0,0,1);
         double temp, temp2, t, D;
@@ -389,26 +634,69 @@ public:
         temp = (D + r->start.dotProduct(n));
         temp2 = r->dir.dotProduct(n);
         t = -temp/temp2;
-        Vector3D int_point = get_intersect_point(r,t);
-        if(int_point.x >= reference_point.x && int_point.x <= -reference_point.x && int_point.y >= reference_point.y && int_point.y <= -reference_point.y){
-            int val = int(ceil(int_point.x/length)) + int(ceil(int_point.y/length));
-            if( val%2 == 0 ) {
-                color_out[0] = 1;
-                color_out[1] = 1;
-                color_out[2] = 1;
+        if(level == 0 ) return t;
+
+        else if (level > 0){
+            
+            //fout<<"prev t: "<<t<<endl;
+            Vector3D ip = get_intersect_point(r,t);
+            //ip.print();
+            setIpColor(ip);
+            //fout<< color[0]<<" "<<color[1]<<" "<<color[2]<<endl;
+            //ambient color
+            color_out[0] = color[0] * coEfficients[0];
+            color_out[1] = color[1] * coEfficients[0];
+            color_out[2] = color[2] * coEfficients[0];
+            Vector3D N = getNormal(ip);
+            if(debugF) fout<< color_out[0]<<" "<<color_out[1]<<" "<<color_out[2]<<endl;
+            for(int i=0; i<lights.size(); i++){
+
+                //Vector3D l_ray_start = ip+(lights[i]->light_pos - ip).normalize() + eps;
+                //Ray *l_ray = new Ray(l_ray_start, lights[i]->light_pos - l_ray_start);
+                //double dist = (lights[i]->light_pos - l_ray_start).getValue();
+
+                Vector3D l_ray_start = ip + eps;
+                Ray *l_ray = new Ray(l_ray_start, lights[i]->light_pos - ip);
+                double dist = (lights[i]->light_pos - l_ray_start).getValue();
+
+                //l_ray->print();
+                //double dist = (lights[i]->light_pos - ip).getValue();
+                
+                if(debugF) fout<< dist<<" "<< (lights[i]->light_pos - l_ray_start).getValue()<<endl;
+                bool obscured = false;
+                for(int j=0; j<objects.size(); j++){
+                    double *dumcolor = new double[3];
+                    //objects[j]->test();
+                    double t2 = objects[j]->intersect(l_ray,dumcolor,0);
+                    if(debugF) fout<<j<<" ----------------"<<t2<<endl;
+                    if(t2 > 0 && t2< dist){
+                        obscured = true;
+                        if(debugF) fout<<t2<<" break"<<endl;
+                        break;
+                    }
+                }
+                if(!obscured){
+                    if(debugF) fout<<"diff & spec"<<endl;
+                    Vector3D L,R,V,r_ray_dir,tempV;
+                    double lambert,phong,temp;
+
+                    L = l_ray->dir;
+                    r_ray_dir = L - N*(2.0 * L.dotProduct(N));
+                    Ray *r_ray = new Ray(ip,r_ray_dir);
+                    R = r_ray->dir;
+                    lambert = max(0.0, L.dotProduct(N));
+                    V = r->dir;
+                    phong = max(0.0, R.dotProduct(V));
+                   
+
+                    color_out[0] += lights[i]->color[0] * color[0] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                    color_out[1] += lights[i]->color[1] * color[1] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                    color_out[2] += lights[i]->color[2] * color[2] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                }
             }
-            else {
-                color_out[0] = 0;
-                color_out[1] = 0;
-                color_out[2] = 0;
-            } 
+        
+            return t;
         }
-        else{
-            color_out[0] = 0;
-            color_out[1] = 0;
-            color_out[2] = 0;
-        }
-        return t;
         //return -1.0;
     }
 };
@@ -440,10 +728,17 @@ public:
         cout<<length<<" "<<width<<" "<<height<<endl;
 
     }
+    Vector3D getNormal(Vector3D ip){
+        double dx,dy,dz;
+        dx = 2 * a * ip.x + d * ip.y + e * ip.z + g;
+        dy = 2 * b * ip.y + d * ip.x + f * ip.z + h;
+        dz = 2 * c * ip.z + e * ip.x + f * ip.y + i;
+        return Vector3D(dx,dy,dz).normalize();
+    }
     double intersect(Ray *r, double *color_out, int level){
         double ax,bx,cx, xd,yd,zd, xo,yo,zo;
         double t0,t1,t,discrim;
-        bool in1=false,in2=false;
+        bool in1=false,in2=false,in0=false;
         Vector3D intP;
         xd = r->dir.x;
         yd = r->dir.y;
@@ -460,12 +755,13 @@ public:
         if(ax == 0.0f) {
             t = -cx/bx;
             intP = get_intersect_point(r,t);
+            
             if((length==0.0f || ( intP.x >= reference_point.x && intP.x <= reference_point.x+length)) && (width==0.0f ||( intP.y >= reference_point.y && intP.y <= reference_point.y+width)) && (height==0.0f || (intP.z >= reference_point.z && intP.z <= reference_point.z+ height))){
                 //if(t0 > 0.0f) 
-                
                 //cout<<"..............   0"<<endl;
-                return t;
+                in0 = true;
             }
+            if(!in0) return -1.0;
             
         }
         else{
@@ -491,48 +787,65 @@ public:
                 in2 = true;
                 //cout<<"..............   2"<<endl;
             }
-            if(in1 && in2) return min(t0,t1);
-            else if(in1) return t0;
-            else if(in2) return t1;
+            if(in1 && in2) t =  min(t0,t1);
+            else if(in1) t = t0;
+            else if(in2) t = t1;
             else return -1;
+            if(level == 0) return t;
+            else if (level > 0){
+                
+                if (debugG) fout<<"prev t: "<<t<<endl;
+                Vector3D ip = get_intersect_point(r,t);
+                //ambient color
+                color_out[0] = color[0] * coEfficients[0];
+                color_out[1] = color[1] * coEfficients[0];
+                color_out[2] = color[2] * coEfficients[0];
+                Vector3D N = getNormal(ip);
+                
+                for(int i=0; i<lights.size(); i++){
+                    
+                    Vector3D l_ray_start = ip + eps;
+                    Ray *l_ray = new Ray(l_ray_start, lights[i]->light_pos - ip);
+                    double dist = (lights[i]->light_pos - l_ray_start).getValue();
+                    
+                    if (debugG) fout<< dist<<" "<< (lights[i]->light_pos - l_ray_start).getValue()<<endl;
+                    bool obscured = false;
+                    for(int j=0; j<objects.size(); j++){
+                        double *dumcolor = new double[3];
+                        double t2 = objects[j]->intersect(l_ray,dumcolor,0);
+                        if (debugG) fout<<j<<" ----------------"<<t2<<endl;
+                        if(t2 > 0 && t2< dist){
+                            obscured = true;
+                            if (debugG) fout<<t2<<" break"<<endl;
+                            break;
+                        }
+                    }
+                    if(!obscured){
+                        if (debugG) fout<<"diff & spec"<<endl;
+                        Vector3D L,R,V,r_ray_dir,tempV;
+                        double lambert,phong,temp;
+
+                        L = l_ray->dir;
+                        r_ray_dir = L - N*(2.0 * L.dotProduct(N));
+                        Ray *r_ray = new Ray(ip,r_ray_dir);
+                        R = r_ray->dir;
+                        lambert = max(0.0, L.dotProduct(N));
+                        V = r->dir;
+                        phong = max(0.0, R.dotProduct(V));
+
+                        color_out[0] += lights[i]->color[0] * color[0] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                        color_out[1] += lights[i]->color[1] * color[1] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                        color_out[2] += lights[i]->color[2] * color[2] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
+                    }
+                }
+            
+                return t;
+            }           
+
+
         }
         return -1;
     }
-};
-class Light{
-    Vector3D light_pos;
-    double color[3];
-public:
-    Light(Vector3D light_pos){
-        this->light_pos = light_pos;
-    }
-    Light(Vector3D light_pos, double r, double g, double b){
-        this->light_pos = light_pos;
-        this->color[0] = r;
-        this->color[1] = g;
-        this->color[2] = b;
-    }
-    void setColor(double r, double g, double b){
-        this->color[0] = r;
-        this->color[1] = g;
-        this->color[2] = b;
-    }
-    void print(){
-        cout<<"Light printing...."<<endl;
-        cout<<light_pos.x<<" "<<light_pos.y<<" "<<light_pos.z<<endl;
-        cout<<color[0]<<" "<<color[1]<<" "<<color[2]<<endl;
-    }
-    void draw(){
-        glColor3d(color[0],color[1],color[2]);
-        glPointSize(5);
-        glBegin(GL_POINTS);
-        {
-            glVertex3d(light_pos.x,light_pos.y,light_pos.z);
-        }
-        glEnd();
-        
-    }
-
 };
 
 

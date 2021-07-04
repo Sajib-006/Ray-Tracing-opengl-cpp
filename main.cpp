@@ -8,12 +8,15 @@
 #include <GL/glut.h>
 
 #include "bitmap_image.hpp"
+
 #include "1605064.h"
 //#include <fstream>
 using namespace std;
 #include<string.h>
 #define pi (2 * acos(0.0))
 
+vector<Object*> objects;
+vector<Light*> lights;
 void capture();
 
 double cameraHeight;
@@ -29,13 +32,12 @@ bool isShot;
 long shotCnt;
 
 int recursion_level, pixels, total_obj, total_lights;
-vector<Object*> objects;
-vector<Light*> lights;
+
 
 
 point shotPoints[5000];
-//point pos = {100, 100, 50};
-point pos = {150, 250, 130};
+point pos = {100, 100, 50};
+//point pos = {150, 250, 130};
 point u = {0, 0, 1};
 point r = {-1 / sqrt(2), 1 / sqrt(2), 0};
 point l = {-1 / sqrt(2), -1 / sqrt(2), 0};
@@ -832,6 +834,7 @@ void capture()
     //         image.set_pixel(i,j,0,255,255);
     //     }
     // }
+	
 	double planeDistance, windowWidth, windowHeight, viewAngle, du, dv, imageWidth, imageHeight;
 	point eye, topleft, curPixel;
 	windowWidth = 500;
@@ -914,6 +917,7 @@ void capture()
 			bool changed = false;
 			if(i==0 && j==0) ray->print(); //----------------
 			for(int i=0; i<objects.size(); i++){
+				//cout<<"level 0: ";
 				t = objects[i]->intersect(ray, dummyColor, 0);
 				
 				if(t > 0 && t < tMin){
@@ -925,6 +929,7 @@ void capture()
 				}
 			}
 			if(changed){
+				//cout<<"level 1: ";
 				tMin = nearest_obj->intersect(ray, color, 1);
 				double color_r = clipColor(color[0]) * 255;
 				double color_g = clipColor(color[1]) * 255;
