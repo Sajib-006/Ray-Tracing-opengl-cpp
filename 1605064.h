@@ -535,9 +535,10 @@ public:
         glEnd();
     }
     Vector3D getNormal(Vector3D ip){
-        Vector3D N =(vertex[1]-vertex[0]).crossProduct(( vertex[2]-vertex[0] ));
+        Vector3D N =(vertex[1]-vertex[0]).crossProduct(vertex[2]-vertex[0]);
         if(ip.dotProduct(N)) return N.reverse().normalize();
-        else return N;
+        N.print();
+        return N.normalize();
     }
     double intersect(Ray *r, double *color_out, int level){
         double b, y, t, det;
