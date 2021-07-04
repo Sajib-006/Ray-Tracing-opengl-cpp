@@ -600,6 +600,41 @@ public:
                         color_out[2] += lights[i]->color[2] * color[2] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
                     }
                 }
+                if(level < recursion_level){
+                double tMin=INT_MAX;
+                double *reflected_color = new double[3];
+                Vector3D reflection_dir = (r->dir - N * (2.0 * N.dotProduct(r->dir))).normalize();
+                Vector3D reflection_start = ip + eps;
+                Ray *reflection_ray = new Ray(reflection_start,reflection_dir);
+                Object *nearest_obj = 0;
+                bool changed = false;
+                //if(i==0 && j==0) ray->print(); //----------------
+                for(int m=0; m<objects.size(); m++){
+                    //cout<<"level 0: ";
+                    double t3 = objects[m]->intersect(reflection_ray, reflected_color, 0);
+                    
+                    if(t3 > 0 && t3 < tMin){
+                        tMin = t3;
+                        nearest_obj = objects[m];
+                        changed = true;
+                        //test_cnt++;
+                        //fout<<cnt<<" "<<t<<endl; //--------------
+                    }
+                }
+                if(changed){
+                    //cout<<"level 1: ";
+                    tMin = nearest_obj->intersect(reflection_ray, reflected_color, level+1);
+                    double color_r = clipColor(reflected_color[0]) * 255;
+                    double color_g = clipColor(reflected_color[1]) * 255;
+                    double color_b = clipColor(reflected_color[2]) * 255;
+                    //cout<< color_r << " " << color_g << " " << color_b << endl; //------------
+                    color_out[0] += color_r * coEfficients[3];
+                    color_out[1] += color_g * coEfficients[3];
+                    color_out[2] += color_b * coEfficients[3];
+                    //delete nearest_obj;
+                }
+                    
+            }
             
                 return t;
             }
@@ -731,6 +766,41 @@ public:
                     color_out[1] += lights[i]->color[1] * color[1] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
                     color_out[2] += lights[i]->color[2] * color[2] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
                 }
+            }
+            if(level < recursion_level){
+                double tMin=INT_MAX;
+                double *reflected_color = new double[3];
+                Vector3D reflection_dir = (r->dir - N * (2.0 * N.dotProduct(r->dir))).normalize();
+                Vector3D reflection_start = ip + eps;
+                Ray *reflection_ray = new Ray(reflection_start,reflection_dir);
+                Object *nearest_obj = 0;
+                bool changed = false;
+                //if(i==0 && j==0) ray->print(); //----------------
+                for(int m=0; m<objects.size(); m++){
+                    //cout<<"level 0: ";
+                    double t3 = objects[m]->intersect(reflection_ray, reflected_color, 0);
+                    
+                    if(t3 > 0 && t3 < tMin){
+                        tMin = t3;
+                        nearest_obj = objects[m];
+                        changed = true;
+                        //test_cnt++;
+                        //fout<<cnt<<" "<<t<<endl; //--------------
+                    }
+                }
+                if(changed){
+                    //cout<<"level 1: ";
+                    tMin = nearest_obj->intersect(reflection_ray, reflected_color, level+1);
+                    double color_r = clipColor(reflected_color[0]) * 255;
+                    double color_g = clipColor(reflected_color[1]) * 255;
+                    double color_b = clipColor(reflected_color[2]) * 255;
+                    //cout<< color_r << " " << color_g << " " << color_b << endl; //------------
+                    color_out[0] += color_r * coEfficients[3];
+                    color_out[1] += color_g * coEfficients[3];
+                    color_out[2] += color_b * coEfficients[3];
+                    //delete nearest_obj;
+                }
+                    
             }
         
             return t;
@@ -876,6 +946,42 @@ public:
                         color_out[2] += lights[i]->color[2] * color[2] * (lambert * coEfficients[1] + pow(phong,shine) * coEfficients[2]);
                     }
                 }
+
+                if(level < recursion_level){
+                double tMin=INT_MAX;
+                double *reflected_color = new double[3];
+                Vector3D reflection_dir = (r->dir - N * (2.0 * N.dotProduct(r->dir))).normalize();
+                Vector3D reflection_start = ip + eps;
+                Ray *reflection_ray = new Ray(reflection_start,reflection_dir);
+                Object *nearest_obj = 0;
+                bool changed = false;
+                //if(i==0 && j==0) ray->print(); //----------------
+                for(int m=0; m<objects.size(); m++){
+                    //cout<<"level 0: ";
+                    double t3 = objects[m]->intersect(reflection_ray, reflected_color, 0);
+                    
+                    if(t3 > 0 && t3 < tMin){
+                        tMin = t3;
+                        nearest_obj = objects[m];
+                        changed = true;
+                        //test_cnt++;
+                        //fout<<cnt<<" "<<t<<endl; //--------------
+                    }
+                }
+                if(changed){
+                    //cout<<"level 1: ";
+                    tMin = nearest_obj->intersect(reflection_ray, reflected_color, level+1);
+                    double color_r = clipColor(reflected_color[0]) * 255;
+                    double color_g = clipColor(reflected_color[1]) * 255;
+                    double color_b = clipColor(reflected_color[2]) * 255;
+                    //cout<< color_r << " " << color_g << " " << color_b << endl; //------------
+                    color_out[0] += color_r * coEfficients[3];
+                    color_out[1] += color_g * coEfficients[3];
+                    color_out[2] += color_b * coEfficients[3];
+                    //delete nearest_obj;
+                }
+                    
+            }
             
                 return t;
             }           
