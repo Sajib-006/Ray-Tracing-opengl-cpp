@@ -3,7 +3,7 @@
 #define pi (2 * acos(0.0))
 using namespace std;
 ofstream fout("t_test.txt");
-const double eps = 0.00001;
+const double eps = 0.01;
 bool debugF = false;
 bool debugS = false;
 bool debugT = false;
@@ -484,9 +484,9 @@ public:
                 if(changed){
                     //cout<<"level 1: ";
                     tMin = nearest_obj->intersect(reflection_ray, reflected_color, level+1);
-                    double color_r = clipColor(reflected_color[0]) * 255;
-                    double color_g = clipColor(reflected_color[1]) * 255;
-                    double color_b = clipColor(reflected_color[2]) * 255;
+                    double color_r = clipColor(reflected_color[0]);
+                    double color_g = clipColor(reflected_color[1]);
+                    double color_b = clipColor(reflected_color[2]);
                     //cout<< color_r << " " << color_g << " " << color_b << endl; //------------
                     color_out[0] += color_r * coEfficients[3];
                     color_out[1] += color_g * coEfficients[3];
@@ -625,9 +625,9 @@ public:
                 if(changed){
                     //cout<<"level 1: ";
                     tMin = nearest_obj->intersect(reflection_ray, reflected_color, level+1);
-                    double color_r = clipColor(reflected_color[0]) * 255;
-                    double color_g = clipColor(reflected_color[1]) * 255;
-                    double color_b = clipColor(reflected_color[2]) * 255;
+                    double color_r = clipColor(reflected_color[0]);
+                    double color_g = clipColor(reflected_color[1]);
+                    double color_b = clipColor(reflected_color[2]);
                     //cout<< color_r << " " << color_g << " " << color_b << endl; //------------
                     color_out[0] += color_r * coEfficients[3];
                     color_out[1] += color_g * coEfficients[3];
@@ -792,9 +792,9 @@ public:
                 if(changed){
                     //cout<<"level 1: ";
                     tMin = nearest_obj->intersect(reflection_ray, reflected_color, level+1);
-                    double color_r = clipColor(reflected_color[0]) * 255;
-                    double color_g = clipColor(reflected_color[1]) * 255;
-                    double color_b = clipColor(reflected_color[2]) * 255;
+                    double color_r = clipColor(reflected_color[0]);
+                    double color_g = clipColor(reflected_color[1]);
+                    double color_b = clipColor(reflected_color[2]);
                     //cout<< color_r << " " << color_g << " " << color_b << endl; //------------
                     color_out[0] += color_r * coEfficients[3];
                     color_out[1] += color_g * coEfficients[3];
@@ -972,9 +972,9 @@ public:
                 if(changed){
                     //cout<<"level 1: ";
                     tMin = nearest_obj->intersect(reflection_ray, reflected_color, level+1);
-                    double color_r = clipColor(reflected_color[0]) * 255;
-                    double color_g = clipColor(reflected_color[1]) * 255;
-                    double color_b = clipColor(reflected_color[2]) * 255;
+                    double color_r = clipColor(reflected_color[0]);
+                    double color_g = clipColor(reflected_color[1]);
+                    double color_b = clipColor(reflected_color[2]);
                     //cout<< color_r << " " << color_g << " " << color_b << endl; //------------
                     color_out[0] += color_r * coEfficients[3];
                     color_out[1] += color_g * coEfficients[3];
