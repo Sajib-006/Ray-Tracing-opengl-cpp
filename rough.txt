@@ -1,7 +1,0 @@
-vector<Object*>::iterator itr;
-	for(itr= objects.begin(); itr!=end(); itr++){
-	// for(int i=0; i<objects.size(); i++){
-		
-		Sphere* s = (*itr)->reference_point
-		drawSphereFull(s->reference_point,s->length,20,24,s->color);
-	}

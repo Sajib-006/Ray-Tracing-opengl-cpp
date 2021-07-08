@@ -1,0 +1,41 @@
+if(refraction){
+                double eta = 0.3;
+                Vector3D refraction_dir;
+                double k = 1.0 - pow(eta,2) * (1.0 - pow(N.dotProduct(r->dir),2) );
+                cout<<k<<endl;
+                if(k > 0.0) refraction_dir = (r->dir * eta - N * (eta* N.dotProduct(r->dir) + sqrtf(k))).normalize();
+                else refraction_dir = Vector3D(0,0,0);
+                double tMin2=INT_MAX;
+                double *refracted_color = new double[3];
+                refraction_dir.print();
+                Vector3D refraction_start = ip + eps;
+                Ray *refraction_ray = new Ray(refraction_start,refraction_dir);
+                Object *nearest_obj2 = 0;
+                bool changed2 = false;
+                //if(i==0 && j==0) ray->print(); //----------------
+                for(int m=0; m<objects.size(); m++){
+                    //cout<<"level 0: ";
+                    double t3 = objects[m]->intersect(refraction_ray, refracted_color, 0);
+                    
+                    if(t3 > 0 && t3 < tMin2){
+                        tMin2 = t3;
+                        nearest_obj2 = objects[m];
+                        changed2 = true;
+                        cout<<"here"<<endl;
+                        //test_cnt++;
+                        //fout<<cnt<<" "<<t<<endl; //--------------
+                    }
+                }
+                if(changed2){
+                    //cout<<"level 1: ";
+                    tMin2 = nearest_obj2->intersect(refraction_ray, refracted_color, level+1);
+                    double color_r = clipColor(refracted_color[0]);
+                    double color_g = clipColor(refracted_color[1]);
+                    double color_b = clipColor(refracted_color[2]);
+                    cout<< color_r << " " << color_g << " " << color_b << endl; //------------
+                    color_out[0] += color_r * eta;
+                    color_out[1] += color_g * eta;
+                    color_out[2] += color_b * eta;
+                    //delete nearest_obj;
+                }
+            }
