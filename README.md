@@ -12,5 +12,5 @@ g++ main.cpp -o [name] -lglut -lGLU -lGL
 ./[name]
 
 ## For details
- See Offline 3 spec.pdf
+ See Offline 3 Specs.pdf
 
